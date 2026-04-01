@@ -31,15 +31,18 @@ export default function DropZone({ onFiles, accept = 'image/*', icon, label }: D
       onDragLeave={() => setDragOver(false)}
       onDrop={handleDrop}
       onClick={() => inputRef.current?.click()}
-      className={`border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all duration-200 ${
+      className={`relative overflow-hidden border-2 border-dashed rounded-2xl p-10 sm:p-14 text-center cursor-pointer transition-all duration-300 group ${
         dragOver
           ? 'border-purple-400 bg-purple-500/10 scale-[1.01]'
-          : 'border-gray-600 hover:border-purple-500 hover:bg-purple-500/5'
+          : 'border-gray-700/60 hover:border-purple-500/50 hover:bg-purple-500/5'
       }`}
     >
-      <div className="text-5xl mb-4">{icon}</div>
-      <p className="text-gray-300 text-lg">{label}</p>
-      <p className="text-gray-500 text-sm mt-2">PNG, JPG, WebP</p>
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="relative">
+        <div className="text-5xl mb-3 group-hover:scale-110 transition-transform duration-300">{icon}</div>
+        <p className="text-gray-300 text-base font-medium">{label}</p>
+        <p className="text-gray-600 text-sm mt-2">PNG, JPG, WebP</p>
+      </div>
       <input
         ref={inputRef}
         type="file"
