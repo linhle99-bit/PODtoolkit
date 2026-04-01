@@ -1,9 +1,14 @@
+import { useEffect } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import DropZone from '../../../components/Shared/DropZone';
 import ImageGrid from '../../../components/Shared/ImageGrid';
 
 export default function Step1_UploadMockup() {
-  const { mockups, addMockup, removeMockup, setStep, presets, loadPreset, deletePreset } = useAppStore();
+  const { mockups, addMockup, removeMockup, setStep, presets, presetsLoaded, initPresets, loadPreset, deletePreset } = useAppStore();
+
+  useEffect(() => {
+    initPresets();
+  }, [initPresets]);
 
   const handleFiles = (files: FileList) => {
     Array.from(files)
@@ -34,7 +39,7 @@ export default function Step1_UploadMockup() {
       <p className="text-gray-400 mb-6">Upload mockup images or load a saved store preset</p>
 
       {/* Saved presets */}
-      {presets.length > 0 && (
+      {presetsLoaded && presets.length > 0 && (
         <div className="mb-6">
           <h3 className="text-sm font-medium text-gray-400 mb-3">Saved Store Presets (mockup + print area)</h3>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
@@ -73,7 +78,6 @@ export default function Step1_UploadMockup() {
                 <button
                   onClick={() => {
                     loadPreset(preset.name);
-                    // Skip to step 2 if all print areas defined, otherwise stay
                     const p = presets.find((pp) => pp.name === preset.name);
                     if (p && p.mockups.every((m) => m.printArea)) {
                       setStep(1);

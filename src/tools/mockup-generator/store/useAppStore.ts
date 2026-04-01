@@ -7,19 +7,76 @@ export interface MockupPreset {
   createdAt: number;
 }
 
-const PRESETS_KEY = 'mockup-generator-presets';
+// --- IndexedDB helpers (no size limit unlike localStorage) ---
+const DB_NAME = 'mockup-generator-db';
+const STORE_NAME = 'presets';
+const DB_VERSION = 1;
 
-function loadPresets(): MockupPreset[] {
+function openDB(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: 'name' });
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function loadPresetsFromDB(): Promise<MockupPreset[]> {
   try {
-    const raw = localStorage.getItem(PRESETS_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const db = await openDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => resolve([]);
+    });
   } catch {
     return [];
   }
 }
 
-function savePresetsToStorage(presets: MockupPreset[]) {
-  localStorage.setItem(PRESETS_KEY, JSON.stringify(presets));
+async function savePresetToDB(preset: MockupPreset): Promise<void> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    store.put(preset);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function deletePresetFromDB(name: string): Promise<void> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    store.delete(name);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+// Migrate old localStorage presets to IndexedDB (one-time)
+async function migrateFromLocalStorage(): Promise<MockupPreset[]> {
+  try {
+    const raw = localStorage.getItem('mockup-generator-presets');
+    if (raw) {
+      const presets: MockupPreset[] = JSON.parse(raw);
+      for (const p of presets) {
+        await savePresetToDB(p);
+      }
+      localStorage.removeItem('mockup-generator-presets');
+      return presets;
+    }
+  } catch { /* ignore */ }
+  return [];
 }
 
 interface AppState {
@@ -31,6 +88,7 @@ interface AppState {
   progress: number;
   total: number;
   presets: MockupPreset[];
+  presetsLoaded: boolean;
 
   setStep: (step: number) => void;
   addMockup: (mockup: MockupFile) => void;
@@ -43,9 +101,10 @@ interface AppState {
   setProcessing: (processing: boolean) => void;
   setProgress: (progress: number, total: number) => void;
   clearResults: () => void;
-  savePreset: (name: string) => void;
+  initPresets: () => Promise<void>;
+  savePreset: (name: string) => Promise<void>;
   loadPreset: (name: string) => void;
-  deletePreset: (name: string) => void;
+  deletePreset: (name: string) => Promise<void>;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -56,7 +115,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   processing: false,
   progress: 0,
   total: 0,
-  presets: loadPresets(),
+  presets: [],
+  presetsLoaded: false,
 
   setStep: (step) => set({ currentStep: step }),
   addMockup: (mockup) => set((s) => ({ mockups: [...s.mockups, mockup] })),
@@ -73,13 +133,24 @@ export const useAppStore = create<AppState>((set, get) => ({
   setProgress: (progress, total) => set({ progress, total }),
   clearResults: () => set({ results: [], progress: 0, total: 0 }),
 
-  savePreset: (name) => {
+  initPresets: async () => {
+    if (get().presetsLoaded) return;
+    // Migrate old localStorage data first
+    const migrated = await migrateFromLocalStorage();
+    const existing = await loadPresetsFromDB();
+    // Merge: migrated ones are already saved to DB
+    const all = existing.length > 0 ? existing : migrated;
+    set({ presets: all, presetsLoaded: true });
+  },
+
+  savePreset: async (name) => {
     const { mockups, presets } = get();
     const newPreset: MockupPreset = { name, mockups, createdAt: Date.now() };
+    await savePresetToDB(newPreset);
     const updated = [...presets.filter((p) => p.name !== name), newPreset];
-    savePresetsToStorage(updated);
     set({ presets: updated });
   },
+
   loadPreset: (name) => {
     const { presets } = get();
     const preset = presets.find((p) => p.name === name);
@@ -87,10 +158,11 @@ export const useAppStore = create<AppState>((set, get) => ({
       set({ mockups: preset.mockups.map((m) => ({ ...m, id: crypto.randomUUID() })) });
     }
   },
-  deletePreset: (name) => {
+
+  deletePreset: async (name) => {
     const { presets } = get();
+    await deletePresetFromDB(name);
     const updated = presets.filter((p) => p.name !== name);
-    savePresetsToStorage(updated);
     set({ presets: updated });
   },
 }));
