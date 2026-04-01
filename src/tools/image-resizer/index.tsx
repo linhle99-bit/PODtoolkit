@@ -1,0 +1,1 @@
+export default function ComingSoon() { return <div className="text-center py-20"><p className="text-5xl mb-4">🚧</p><h2 className="text-2xl font-semibold text-white mb-2">Coming Soon</h2><p className="text-gray-400">This tool is under development.</p></div>; }
