@@ -132,10 +132,27 @@ const FeatureIcon = ({ type }: { type: string }) => {
   return null;
 };
 
+const ACCESS_PASSWORD = 'podtool2026';
+
 export default function ImagePromptGenerator() {
   const [showGuide, setShowGuide] = useState(false);
   const [lang, setLang] = useState<'vi' | 'en'>('vi');
+  const [unlocked, setUnlocked] = useState(() => {
+    return localStorage.getItem('ipg_unlocked') === 'true';
+  });
+  const [pwInput, setPwInput] = useState('');
+  const [pwError, setPwError] = useState(false);
   const t = content[lang];
+
+  const handleUnlock = () => {
+    if (pwInput === ACCESS_PASSWORD) {
+      setUnlocked(true);
+      localStorage.setItem('ipg_unlocked', 'true');
+      setPwError(false);
+    } else {
+      setPwError(true);
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -164,19 +181,58 @@ export default function ImagePromptGenerator() {
         <p className="text-gray-400 text-lg max-w-2xl mx-auto">{t.subtitle}</p>
       </div>
 
-      {/* Download */}
+      {/* Download — cần password */}
       <div className="bg-gradient-to-r from-purple-900/40 to-blue-900/40 border border-purple-500/30 rounded-2xl p-8 text-center space-y-6">
-        <h2 className="text-xl font-semibold text-white">{t.download}</h2>
-        <a
-          href={DOWNLOAD_URL}
-          className="inline-flex items-center gap-3 bg-green-500 hover:bg-green-400 text-black font-bold px-8 py-4 rounded-xl text-lg transition-all hover:scale-105"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-          </svg>
-          {t.downloadBtn}
-        </a>
-        <p className="text-gray-400 text-sm">{t.downloadNote}</p>
+        {unlocked ? (
+          <>
+            <h2 className="text-xl font-semibold text-white">{t.download}</h2>
+            <a
+              href={DOWNLOAD_URL}
+              className="inline-flex items-center gap-3 bg-green-500 hover:bg-green-400 text-black font-bold px-8 py-4 rounded-xl text-lg transition-all hover:scale-105"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              {t.downloadBtn}
+            </a>
+            <p className="text-gray-400 text-sm">{t.downloadNote}</p>
+          </>
+        ) : (
+          <>
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold text-white">{t.download}</h2>
+              <div className="inline-block bg-yellow-500/20 border border-yellow-500/40 rounded-full px-4 py-1">
+                <span className="text-yellow-400 font-bold text-2xl">$9.99</span>
+              </div>
+            </div>
+            <p className="text-gray-400 text-sm max-w-md mx-auto">
+              {lang === 'vi'
+                ? 'Nhập mật khẩu để mở khóa tải về. Liên hệ để mua license.'
+                : 'Enter password to unlock download. Contact us to purchase a license.'}
+            </p>
+            <div className="flex items-center justify-center gap-3 max-w-sm mx-auto">
+              <input
+                type="password"
+                value={pwInput}
+                onChange={(e) => { setPwInput(e.target.value); setPwError(false); }}
+                onKeyDown={(e) => e.key === 'Enter' && handleUnlock()}
+                placeholder={lang === 'vi' ? 'Nhập mật khẩu...' : 'Enter password...'}
+                className={`flex-1 bg-gray-800 border ${pwError ? 'border-red-500' : 'border-gray-600'} rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500`}
+              />
+              <button
+                onClick={handleUnlock}
+                className="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+              >
+                {lang === 'vi' ? 'Mở khóa' : 'Unlock'}
+              </button>
+            </div>
+            {pwError && (
+              <p className="text-red-400 text-sm">
+                {lang === 'vi' ? 'Sai mật khẩu!' : 'Wrong password!'}
+              </p>
+            )}
+          </>
+        )}
       </div>
 
       {/* Features */}
