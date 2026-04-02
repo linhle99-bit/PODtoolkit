@@ -5,75 +5,77 @@ const DOWNLOAD_URL = 'https://github.com/linhle99-bit/PODtoolkit/releases/latest
 const content = {
   vi: {
     title: 'Image-to-Prompt Auto Generator',
-    subtitle: 'T\u1ef1 \u0111\u1ed9ng ph\u00e2n t\u00edch \u1ea3nh thi\u1ebft k\u1ebf POD b\u1eb1ng Claude Vision, t\u1ea1o prompt DALL-E, g\u1eedi ChatGPT t\u1ea1o \u1ea3nh m\u1edbi \u2014 t\u1ea5t c\u1ea3 ch\u1ec9 v\u1edbi 1 click.',
-    download: 'T\u1ea3i v\u1ec1 cho Windows',
-    downloadBtn: 'T\u1ea3i ImagePromptGenerator.exe',
-    downloadNote: 'File .exe (~80MB) \u2022 Windows 10/11 \u2022 C\u1ea7n c\u00e0i Google Chrome',
+    subtitle: 'Tự động phân tích ảnh thiết kế POD bằng Claude Vision, tạo prompt DALL-E, gửi ChatGPT tạo ảnh mới — tất cả chỉ với 1 click.',
+    download: 'Tải về cho Windows',
+    downloadBtn: 'Tải ImagePromptGenerator.exe',
+    downloadNote: 'File .exe (~80MB) - Windows 10/11 - Cần cài Google Chrome',
     features: [
-      { icon: '\uD83D\uDD0D', title: 'Claude Vision', desc: 'Ph\u00e2n t\u00edch chi ti\u1ebft thi\u1ebft k\u1ebf POD: m\u00e0u s\u1eafc, phong c\u00e1ch, text, b\u1ed1 c\u1ee5c, ch\u1ea5t li\u1ec7u' },
-      { icon: '\uD83E\uDD16', title: 'DALL-E 3', desc: 'T\u1ef1 \u0111\u1ed9ng g\u1eedi prompt v\u00e0o ChatGPT, t\u1ea1o \u1ea3nh t\u01b0\u01a1ng t\u1ef1 m\u1eabu g\u1ed1c, t\u1ec9 l\u1ec7 1:1' },
-      { icon: '\uD83D\uDCCB', title: 'Trello', desc: 'T\u00edch h\u1ee3p Trello: l\u1ea5y \u1ea3nh t\u1eeb th\u1ebb Idea, upload k\u1ebft qu\u1ea3 l\u00ean th\u1ebb Done, \u0111\u1eb7t \u1ea3nh b\u00eca' },
+      { icon: 'search', title: 'Claude Vision', desc: 'Phân tích chi tiết thiết kế POD: màu sắc, phong cách, text, bố cục, chất liệu' },
+      { icon: 'robot', title: 'DALL-E 3', desc: 'Tự động gửi prompt vào ChatGPT, tạo ảnh tương tự mẫu gốc, tỉ lệ 1:1' },
+      { icon: 'board', title: 'Trello', desc: 'Tích hợp Trello: lấy ảnh từ thẻ Idea, upload kết quả lên thẻ Done, đặt ảnh bìa' },
     ],
-    guide: 'H\u01b0\u1edbng d\u1eabn s\u1eed d\u1ee5ng',
+    guide: 'Hướng dẫn sử dụng',
+    langToggle: 'Tiếng Việt',
     step1: {
-      title: 'B\u01b0\u1edbc 1: C\u00e0i \u0111\u1eb7t',
+      title: 'Bước 1: Cài đặt',
       steps: [
-        'T\u1ea3i file ImagePromptGenerator.exe',
-        'Double-click m\u1edf app',
-        'Nh\u1eadp Anthropic API Key (l\u1ea5y t\u1ea1i console.anthropic.com)',
+        'Tải file ImagePromptGenerator.exe',
+        'Double-click mở app',
+        'Nhập Anthropic API Key (lấy tại console.anthropic.com)',
       ],
     },
     step2: {
-      title: 'B\u01b0\u1edbc 2: \u0110\u0103ng nh\u1eadp ChatGPT',
+      title: 'Bước 2: Đăng nhập ChatGPT',
       steps: [
-        'Nh\u1ea5n n\u00fat "Login ChatGPT" trong app',
-        'Chrome m\u1edf l\u00ean \u2014 \u0111\u0103ng nh\u1eadp t\u00e0i kho\u1ea3n ChatGPT (c\u1ea7n ChatGPT Plus \u0111\u1ec3 d\u00f9ng DALL-E)',
-        '\u0110\u00f3ng Chrome khi login xong',
-        'Ch\u1ec9 c\u1ea7n login 1 l\u1ea7n, c\u00e1c l\u1ea7n sau t\u1ef1 \u0111\u1ed9ng',
+        'Nhấn nút "Login ChatGPT" trong app',
+        'Chrome mở lên — đăng nhập tài khoản ChatGPT (cần ChatGPT Plus để dùng DALL-E)',
+        'Đóng Chrome khi login xong',
+        'Chỉ cần login 1 lần, các lần sau tự động',
       ],
     },
     step3: {
-      title: 'B\u01b0\u1edbc 3: Ch\u1ea1y',
+      title: 'Bước 3: Chạy',
       local: {
-        label: 'Ch\u1ebf \u0111\u1ed9 Local:',
+        label: 'Chế độ Local:',
         steps: [
-          'Ch\u1ecdn Input folder (ch\u1ee9a \u1ea3nh thi\u1ebft k\u1ebf)',
-          'Ch\u1ecdn Output folder (l\u01b0u k\u1ebft qu\u1ea3)',
-          'Nh\u1ea5n CHAY',
+          'Chọn Input folder (chứa ảnh thiết kế)',
+          'Chọn Output folder (lưu kết quả)',
+          'Nhấn CHẠY',
         ],
       },
       trello: {
-        label: 'Ch\u1ebf \u0111\u1ed9 Trello:',
+        label: 'Chế độ Trello:',
         steps: [
-          'Ch\u1ecdn "Trello board" l\u00e0m ngu\u1ed3n \u1ea3nh',
-          'Nh\u1eadp Trello API Key + Token',
-          'Ch\u1ecdn Board, c\u1ed9t Idea v\u00e0 c\u1ed9t Done',
-          'Nh\u1ea5n CHAY \u2014 tool t\u1ef1 x\u1eed l\u00fd t\u1eebng th\u1ebb',
+          'Chọn "Trello board" làm nguồn ảnh',
+          'Nhập Trello API Key + Token',
+          'Chọn Board, cột Idea và cột Done',
+          'Nhấn CHẠY — tool tự xử lý từng thẻ',
         ],
       },
     },
     notes: {
-      title: 'L\u01b0u \u00fd',
+      title: 'Lưu ý',
       items: [
-        'C\u1ea7n t\u00e0i kho\u1ea3n ChatGPT Plus (c\u00f3 DALL-E 3)',
-        'C\u1ea7n Anthropic API Key (Claude Vision)',
-        'M\u00e1y c\u1ea7n c\u00e0i Google Chrome',
-        '\u1ea2nh output l\u00e0 1024\u00d71024 (vu\u00f4ng 1:1)',
+        'Cần tài khoản ChatGPT Plus (có DALL-E 3)',
+        'Cần Anthropic API Key (Claude Vision)',
+        'Máy cần cài Google Chrome',
+        'Ảnh output là 1024x1024 (vuông 1:1)',
       ],
     },
   },
   en: {
     title: 'Image-to-Prompt Auto Generator',
-    subtitle: 'Automatically analyze POD designs with Claude Vision, create DALL-E prompts, send to ChatGPT to generate new images \u2014 all in 1 click.',
+    subtitle: 'Automatically analyze POD designs with Claude Vision, create DALL-E prompts, send to ChatGPT to generate new images — all in 1 click.',
     download: 'Download for Windows',
     downloadBtn: 'Download ImagePromptGenerator.exe',
-    downloadNote: '.exe file (~80MB) \u2022 Windows 10/11 \u2022 Google Chrome required',
+    downloadNote: '.exe file (~80MB) - Windows 10/11 - Google Chrome required',
     features: [
-      { icon: '\uD83D\uDD0D', title: 'Claude Vision', desc: 'Detailed POD design analysis: colors, style, text, composition, materials' },
-      { icon: '\uD83E\uDD16', title: 'DALL-E 3', desc: 'Auto-send prompts to ChatGPT, generate similar images in 1:1 ratio' },
-      { icon: '\uD83D\uDCCB', title: 'Trello', desc: 'Trello integration: pull images from Idea cards, upload results to Done cards' },
+      { icon: 'search', title: 'Claude Vision', desc: 'Detailed POD design analysis: colors, style, text, composition, materials' },
+      { icon: 'robot', title: 'DALL-E 3', desc: 'Auto-send prompts to ChatGPT, generate similar images in 1:1 ratio' },
+      { icon: 'board', title: 'Trello', desc: 'Trello integration: pull images from Idea cards, upload results to Done cards, set cover' },
     ],
     guide: 'How to use',
+    langToggle: 'English',
     step1: {
       title: 'Step 1: Install',
       steps: [
@@ -86,7 +88,7 @@ const content = {
       title: 'Step 2: Login to ChatGPT',
       steps: [
         'Click "Login ChatGPT" button in the app',
-        'Chrome opens \u2014 log in with your ChatGPT account (ChatGPT Plus required for DALL-E)',
+        'Chrome opens — log in with your ChatGPT account (ChatGPT Plus required for DALL-E)',
         'Close Chrome when done',
         'Only need to login once, auto-saved for future use',
       ],
@@ -107,7 +109,7 @@ const content = {
           'Select "Trello board" as image source',
           'Enter Trello API Key + Token',
           'Select Board, Idea column and Done column',
-          'Click RUN \u2014 tool processes each card automatically',
+          'Click RUN — tool processes each card automatically',
         ],
       },
     },
@@ -117,10 +119,17 @@ const content = {
         'ChatGPT Plus account (with DALL-E 3)',
         'Anthropic API Key (Claude Vision)',
         'Google Chrome installed',
-        'Output images are 1024\u00d71024 (square 1:1)',
+        'Output images are 1024x1024 (square 1:1)',
       ],
     },
   },
+};
+
+const FeatureIcon = ({ type }: { type: string }) => {
+  if (type === 'search') return <span className="text-3xl">&#128269;</span>;
+  if (type === 'robot') return <span className="text-3xl">&#129302;</span>;
+  if (type === 'board') return <span className="text-3xl">&#128203;</span>;
+  return null;
 };
 
 export default function ImagePromptGenerator() {
@@ -137,7 +146,7 @@ export default function ImagePromptGenerator() {
             onClick={() => setLang('vi')}
             className={`px-3 py-1.5 rounded-md transition-colors ${lang === 'vi' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'}`}
           >
-            Ti\u1ebfng Vi\u1ec7t
+            Tiếng Việt
           </button>
           <button
             onClick={() => setLang('en')}
@@ -150,7 +159,7 @@ export default function ImagePromptGenerator() {
 
       {/* Header */}
       <div className="text-center space-y-4">
-        <div className="text-6xl">\uD83E\uDDE0</div>
+        <div className="text-6xl">&#129504;</div>
         <h1 className="text-3xl font-bold text-white">{t.title}</h1>
         <p className="text-gray-400 text-lg max-w-2xl mx-auto">{t.subtitle}</p>
       </div>
@@ -174,7 +183,7 @@ export default function ImagePromptGenerator() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {t.features.map((f) => (
           <div key={f.title} className="bg-gray-800/50 border border-gray-700 rounded-xl p-5 space-y-2">
-            <div className="text-3xl">{f.icon}</div>
+            <FeatureIcon type={f.icon} />
             <h3 className="font-semibold text-white">{f.title}</h3>
             <p className="text-gray-400 text-sm">{f.desc}</p>
           </div>
@@ -188,12 +197,16 @@ export default function ImagePromptGenerator() {
           className="w-full px-6 py-4 flex items-center justify-between text-white hover:bg-gray-700/30 transition-colors"
         >
           <span className="font-semibold text-lg">{t.guide}</span>
-          <span className={`transform transition-transform ${showGuide ? 'rotate-180' : ''}`}>\u25BC</span>
+          <svg
+            className={`w-5 h-5 transform transition-transform ${showGuide ? 'rotate-180' : ''}`}
+            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
         </button>
 
         {showGuide && (
           <div className="px-6 pb-6 space-y-6 text-gray-300">
-            {/* Step 1 */}
             <div className="space-y-3">
               <h3 className="font-semibold text-white text-lg">{t.step1.title}</h3>
               <ol className="list-decimal list-inside space-y-1 text-sm">
@@ -201,7 +214,6 @@ export default function ImagePromptGenerator() {
               </ol>
             </div>
 
-            {/* Step 2 */}
             <div className="space-y-3">
               <h3 className="font-semibold text-white text-lg">{t.step2.title}</h3>
               <ol className="list-decimal list-inside space-y-1 text-sm">
@@ -209,7 +221,6 @@ export default function ImagePromptGenerator() {
               </ol>
             </div>
 
-            {/* Step 3 */}
             <div className="space-y-3">
               <h3 className="font-semibold text-white text-lg">{t.step3.title}</h3>
               <p className="text-sm font-medium text-blue-400">{t.step3.local.label}</p>
@@ -222,7 +233,6 @@ export default function ImagePromptGenerator() {
               </ol>
             </div>
 
-            {/* Notes */}
             <div className="bg-yellow-900/30 border border-yellow-500/30 rounded-lg p-4 text-sm">
               <strong className="text-yellow-400">{t.notes.title}:</strong>
               <ul className="list-disc list-inside mt-1 space-y-1 text-yellow-200/70">

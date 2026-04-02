@@ -25,8 +25,8 @@ const tools: ToolInfo[] = [
   {
     id: 'image-prompt-generator',
     name: 'Image Prompt Generator',
-    description: 'Ph\u00e2n t\u00edch \u1ea3nh thi\u1ebft k\u1ebf POD b\u1eb1ng AI, t\u1ef1 \u0111\u1ed9ng t\u1ea1o \u1ea3nh t\u01b0\u01a1ng t\u1ef1 qua DALL-E',
-    icon: '\uD83E\uDDE0',
+    description: 'AI phân tích thiết kế POD, tự động tạo ảnh tương tự qua DALL-E',
+    icon: '🧠',
     path: '/image-prompt-generator',
     component: lazy(() => import('./image-prompt-generator')),
     category: 'AI',
