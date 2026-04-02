@@ -40,30 +40,29 @@ export const DEFAULT_CONFIG: BundleConfig = {
 
 /* ── font loading ───────────────────────────────────────── */
 
-const FONT_LOADED = { badge: false, title: false };
-
-async function loadGoogleFont(family: string, weight = '700'): Promise<void> {
-  const url = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:wght@${weight}&display=swap`;
-  const css = await fetch(url).then(r => r.text());
-  // Extract font URL from CSS
-  const match = css.match(/url\(([^)]+)\)/);
-  if (!match) return;
-  const fontUrl = match[1];
-  const font = new FontFace(family, `url(${fontUrl})`, { weight });
-  const loaded = await font.load();
-  document.fonts.add(loaded);
-}
+let _fontsLoaded = false;
 
 export async function preloadFonts(): Promise<void> {
+  if (_fontsLoaded) return;
   try {
-    await Promise.all([
-      loadGoogleFont('Playfair Display', '700'),
-      loadGoogleFont('Poppins', '700'),
-    ]);
-    FONT_LOADED.title = true;
-    FONT_LOADED.badge = true;
-  } catch {
-    // Fallback to system fonts
+    // Load fonts via FontFace API with direct Google Fonts static URLs
+    const fonts = [
+      new FontFace(
+        'Playfair Display',
+        'url(https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKd3vXDXbtM.woff2)',
+        { weight: '700', style: 'normal' },
+      ),
+      new FontFace(
+        'Poppins',
+        'url(https://fonts.gstatic.com/s/poppins/v22/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2)',
+        { weight: '700', style: 'normal' },
+      ),
+    ];
+    const loaded = await Promise.all(fonts.map((f) => f.load()));
+    loaded.forEach((f) => document.fonts.add(f));
+    _fontsLoaded = true;
+  } catch (e) {
+    console.warn('Font loading failed, using fallbacks:', e);
   }
 }
 

@@ -22,25 +22,24 @@ export async function generateBackground(
   // DALL-E 3 supported sizes: 1024x1024, 1024x1792, 1792x1024
   const size = isLandscape ? '1792x1024' : '1024x1024';
 
-  const prompt = `Create a COLORFUL, VIBRANT themed border/frame background for "${theme}" products.
+  const prompt = `Create an elegant background with SUBTLE themed decorations for a "${theme}" product listing.
 
-Accent color: ${accentColor}
+Base: soft warm cream/beige (#FFF8F0) solid color filling the entire image.
+Accent: ${accentColor}
 Orientation: ${aspect}
 
-DESIGN:
-- BEAUTIFUL COLORFUL decorative BORDER/FRAME around ALL 4 edges of the image
-- The border should be RICH, DETAILED, and THEMED to "${theme}"
-  Disney theme: colorful castle towers, stars, fireworks, magic sparkles, character silhouettes in vivid colors
-  Vintage: ornate golden frames, rich warm textures, decorative scrollwork
-  Floral: lush colorful flower garlands, vines, petals
-  Y2K: bold neon gradients, geometric patterns, holographic effects
-- The border/frame should be 15-20% of each edge, COLORFUL and VIVID (not faded/transparent)
-- CENTER of the image: PURE CLEAN WHITE or very light color (#FFFFFF or #FFFDF8) - completely empty
-- Sharp contrast between the colorful border and the clean white center
-- Think: premium picture frame effect - ornate colorful frame with clean white mat inside
-- Use vibrant colors that match ${accentColor} palette
-- NO text, NO logos, NO mockup products
-- The frame should look EXPENSIVE, PREMIUM, like a high-end product showcase`;
+DECORATIONS (themed to "${theme}"):
+- Small, delicate, PASTEL-COLORED motifs scattered ONLY around the edges and corners
+- For Disney: tiny pastel mickey head silhouettes, small stars, thin castle outlines, subtle sparkle dots — all in soft pastel colors (light pink, baby blue, soft gold, lavender)
+- For vintage: light sepia flourishes at corners, thin ornate line border
+- For floral: soft watercolor petals along edges
+- These motifs should be SMALL (each under 5% of the image), SOFT PASTEL tones, evenly spaced around the border area
+- A thin elegant decorative line border about 3% from the edges
+- The CENTER 75% must be COMPLETELY CLEAN — just the solid cream background, nothing else
+- Overall feeling: soft, elegant, like premium stationery or invitation card
+- Colors must be PASTEL and MUTED — no vivid, no neon, no saturated colors
+- NO text, NO logos, NO characters, NO objects — only abstract motifs and shapes
+- Think: Etsy listing background that looks expensive but doesn't distract from products`;
 
   const response = await fetch('https://api.openai.com/v1/images/generations', {
     method: 'POST',
