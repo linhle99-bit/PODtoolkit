@@ -18,6 +18,8 @@ export interface BundleConfig {
   rotationRange: [number, number];
   titleFontSize: number;
   badgeFontSize: number;
+  /** Optional AI-generated background image */
+  backgroundImage?: HTMLImageElement | null;
 }
 
 export const DEFAULT_CONFIG: BundleConfig = {
@@ -366,11 +368,21 @@ export function renderBundle(
   canvas.height = config.height;
   const ctx = canvas.getContext('2d')!;
 
-  // Background
-  drawBackground(ctx, config.width, config.height, config.backgroundColor);
-
-  // Decorative frame
-  drawDecoFrame(ctx, config.width, config.height, config.accentColor, config.padding / 2);
+  // Background: AI image or gradient fallback
+  if (config.backgroundImage && config.backgroundImage.naturalWidth > 0) {
+    // Draw AI background, cover the canvas
+    const bgImg = config.backgroundImage;
+    const scale = Math.max(config.width / bgImg.naturalWidth, config.height / bgImg.naturalHeight);
+    const bw = bgImg.naturalWidth * scale;
+    const bh = bgImg.naturalHeight * scale;
+    const bx = (config.width - bw) / 2;
+    const by = (config.height - bh) / 2;
+    ctx.drawImage(bgImg, bx, by, bw, bh);
+  } else {
+    drawBackground(ctx, config.width, config.height, config.backgroundColor);
+    // Decorative frame only when no AI background
+    drawDecoFrame(ctx, config.width, config.height, config.accentColor, config.padding / 2);
+  }
 
   // Layout
   if (config.layout === 'grid') {

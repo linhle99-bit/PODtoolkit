@@ -4,12 +4,14 @@ import SettingsPanel from './components/SettingsPanel';
 import PreviewExport from './components/PreviewExport';
 import { DEFAULT_CONFIG, type BundleConfig } from './utils/canvas-renderer';
 import { analyzeDesigns, type AiAnalysisResult } from './utils/ai-analyzer';
+import { generateBackground, loadImage } from './utils/openai-bg-generator';
 
 export default function BundleGenerator() {
   const [imageSrcs, setImageSrcs] = useState<string[]>([]);
   const [config, setConfig] = useState<BundleConfig>({ ...DEFAULT_CONFIG });
   const [aiLoading, setAiLoading] = useState(false);
   const [aiResult, setAiResult] = useState<AiAnalysisResult | null>(null);
+  const [bgLoading, setBgLoading] = useState(false);
 
   const handleAddFiles = useCallback((files: FileList) => {
     const newSrcs: string[] = [];
@@ -32,19 +34,20 @@ export default function BundleGenerator() {
     imageSrcs.forEach((src) => URL.revokeObjectURL(src));
     setImageSrcs([]);
     setAiResult(null);
+    setConfig((prev) => ({ ...prev, backgroundImage: null }));
   }, [imageSrcs]);
 
   const handleConfigChange = useCallback((patch: Partial<BundleConfig>) => {
     setConfig((prev) => ({ ...prev, ...patch }));
   }, []);
 
+  // Claude: analyze theme
   const handleAiAnalyze = useCallback(async (apiKey: string) => {
     if (imageSrcs.length < 2) return;
     setAiLoading(true);
     try {
       const result = await analyzeDesigns(imageSrcs, apiKey);
       setAiResult(result);
-      // Apply AI suggestions to config
       setConfig((prev) => ({
         ...prev,
         title: result.bundle_name,
@@ -53,11 +56,33 @@ export default function BundleGenerator() {
         titleColor: result.title_color,
       }));
     } catch (err) {
-      alert(`AI analysis failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      alert(`Claude analysis failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setAiLoading(false);
     }
   }, [imageSrcs]);
+
+  // OpenAI: generate background
+  const handleGenerateBg = useCallback(async (apiKey: string) => {
+    setBgLoading(true);
+    try {
+      const theme = aiResult?.theme || config.title || 'professional product showcase';
+      const result = await generateBackground(
+        apiKey, theme, config.accentColor, config.backgroundColor,
+        config.width, config.height,
+      );
+      const bgImg = await loadImage(result.dataUrl);
+      setConfig((prev) => ({ ...prev, backgroundImage: bgImg }));
+    } catch (err) {
+      alert(`OpenAI background generation failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setBgLoading(false);
+    }
+  }, [aiResult, config.title, config.accentColor, config.backgroundColor, config.width, config.height]);
+
+  const handleClearBg = useCallback(() => {
+    setConfig((prev) => ({ ...prev, backgroundImage: null }));
+  }, []);
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -93,6 +118,10 @@ export default function BundleGenerator() {
                 onAiAnalyze={handleAiAnalyze}
                 aiLoading={aiLoading}
                 aiResult={aiResult}
+                onGenerateBg={handleGenerateBg}
+                bgLoading={bgLoading}
+                hasBgImage={!!config.backgroundImage}
+                onClearBg={handleClearBg}
               />
             </div>
           </div>
