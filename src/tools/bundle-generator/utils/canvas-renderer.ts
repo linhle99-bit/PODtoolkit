@@ -368,19 +368,27 @@ export function renderBundle(
   canvas.height = config.height;
   const ctx = canvas.getContext('2d')!;
 
+  const hasBgImage = config.backgroundImage && config.backgroundImage.naturalWidth > 0;
+
   // Background: AI image or gradient fallback
-  if (config.backgroundImage && config.backgroundImage.naturalWidth > 0) {
-    // Draw AI background, cover the canvas
-    const bgImg = config.backgroundImage;
+  if (hasBgImage) {
+    const bgImg = config.backgroundImage!;
     const scale = Math.max(config.width / bgImg.naturalWidth, config.height / bgImg.naturalHeight);
     const bw = bgImg.naturalWidth * scale;
     const bh = bgImg.naturalHeight * scale;
     const bx = (config.width - bw) / 2;
     const by = (config.height - bh) / 2;
     ctx.drawImage(bgImg, bx, by, bw, bh);
+
+    // Semi-transparent overlay on designs area so designs pop
+    const headerH = Math.round(config.height * config.headerRatio);
+    const [bgR, bgG, bgB] = hexToRgb(config.backgroundColor);
+    const designsY = headerH;
+    const designsH = config.height - headerH;
+    ctx.fillStyle = `rgba(${bgR},${bgG},${bgB},0.55)`;
+    ctx.fillRect(0, designsY, config.width, designsH);
   } else {
     drawBackground(ctx, config.width, config.height, config.backgroundColor);
-    // Decorative frame only when no AI background
     drawDecoFrame(ctx, config.width, config.height, config.accentColor, config.padding / 2);
   }
 
@@ -389,6 +397,14 @@ export function renderBundle(
     renderGrid(ctx, images, config);
   } else {
     renderCollage(ctx, images, config);
+  }
+
+  // Frosted header bar behind title for readability
+  if (hasBgImage) {
+    const headerH = Math.round(config.height * config.headerRatio);
+    const [bgR, bgG, bgB] = hexToRgb(config.backgroundColor);
+    ctx.fillStyle = `rgba(${bgR},${bgG},${bgB},0.75)`;
+    ctx.fillRect(0, 0, config.width, headerH);
   }
 
   // Header on top

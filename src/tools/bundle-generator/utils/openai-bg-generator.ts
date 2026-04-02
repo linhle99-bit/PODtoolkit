@@ -22,23 +22,24 @@ export async function generateBackground(
   // DALL-E 3 supported sizes: 1024x1024, 1024x1792, 1792x1024
   const size = isLandscape ? '1792x1024' : '1024x1024';
 
-  const prompt = `Create a beautiful, professional product showcase background for an Etsy listing mockup bundle.
+  const prompt = `Create a VERY SUBTLE, MINIMAL background texture for a product listing image.
 
 Theme: ${theme}
-Main color: ${bgColor}
-Accent color: ${accentColor}
+Base color: ${bgColor}
+Accent: ${accentColor}
 Orientation: ${aspect}
 
-Requirements:
-- Soft, elegant background texture/pattern that matches the "${theme}" theme
-- Keep the CENTER AREA mostly clean and empty (designs will be placed on top)
-- Subtle decorative elements around the EDGES and CORNERS only (flourishes, patterns, textures, bokeh, sparkles)
-- Use colors that complement ${bgColor} as the base tone
-- Professional, high-end, marketplace-ready aesthetic
-- NO text, NO logos, NO mockup products, NO placeholder squares
-- Think: premium Etsy listing background, Creative Market product showcase
-- Subtle depth with vignette or gradient feel
-- The overall mood should match: ${theme}`;
+CRITICAL RULES:
+- 90% of the image must be a CLEAN, FLAT, SOLID color close to ${bgColor}
+- Only VERY FAINT decorative elements at the 4 CORNERS (tiny flourishes, small ornaments)
+- Optionally a VERY THIN elegant border/frame line near the edges
+- The entire CENTER must be COMPLETELY EMPTY and CLEAN - nothing there
+- Think: luxury stationery paper, elegant invitation card background
+- EXTREMELY subtle texture only (like fine paper grain or very light watercolor wash)
+- NO busy patterns, NO illustrations, NO heavy decorations, NO bokeh, NO sparkles
+- NO text, NO logos, NO objects
+- The result should look like a premium solid-color paper with barely-visible corner decorations
+- Less is more - this is a BACKGROUND, the products placed on top must be the star`;
 
   const response = await fetch('https://api.openai.com/v1/images/generations', {
     method: 'POST',
