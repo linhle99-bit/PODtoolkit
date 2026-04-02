@@ -71,11 +71,16 @@ Return ONLY valid JSON (no markdown, no explanation):
     "accent_color": "#hex - VIBRANT badge color. Pull from the dominant color IN the designs themselves.",
     "title_color": "#hex - readable on background, should MATCH the theme mood",
     "card_color": "#hex - LIGHT TINT matching the designs. For princess → #FFF0F5 (lavender blush). For ocean → #F0F8FF. For vintage → #FFF8DC. For nature → #F0FFF0. NEVER plain #FFFFFF.",
-    "bg_style": "DETAILED 2-3 sentence description for DALL-E to generate a UNIQUE background. Describe: (1) the color palette/gradient (2) specific decorative motifs related to the theme (3) the overall mood/texture. Be VERY SPECIFIC about colors and shapes. Example for princess theme: 'Soft gradient from blush pink at edges to pale lavender center. Scattered tiny golden crowns, glass slipper silhouettes, and rose petals along the borders. Delicate golden filigree frame with small heart accents at corners.'",
+    "bg_style": "DETAILED description for generating a PATTERNED background. Must describe a REPEATING PATTERN of themed motifs WITH COLOR scattered across the entire image, like decorative wallpaper. Example for princess: 'Repeating pattern of small pink crowns, golden stars, lavender hearts, and tiny rose silhouettes on a soft blush pink background. Motifs are flat, colorful (pink, gold, purple), evenly distributed like gift wrapping paper.' Example for ocean: 'Pattern of teal seashells, coral starfish, blue waves, and golden seahorses on a light aqua background.' Example for vintage: 'Warm golden background with repeated brown film reels, sepia stars, and amber coffee cup silhouettes.' The motifs must be COLORED (not gray, not faded) and MATCH the theme.",
     "style_notes": "Why these choices"
 }
 
-CRITICAL: bg_style must be DIFFERENT for every theme. Study the actual designs carefully. Do NOT default to generic beige/cream. Each bundle must look completely unique.`,
+CRITICAL RULES for bg_style:
+- Must describe a PATTERN of COLORED motifs on a colored background (like gift wrapping paper or wallpaper)
+- Motifs must be THEMED icons/shapes related to the designs (crowns, stars, animals, flowers, etc.)
+- Motifs must have SPECIFIC COLORS (pink, gold, teal, etc.) — NOT gray, NOT transparent, NOT faded
+- Background base color should be a TINT of the theme (pink bg for princess, blue bg for ocean, etc.)
+- NEVER use beige/cream/white as default — choose a COLOR that matches the theme`,
     },
   ];
 

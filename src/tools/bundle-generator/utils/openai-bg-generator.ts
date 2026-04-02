@@ -22,22 +22,22 @@ export async function generateBackground(
   const size = isLandscape ? '1792x1024' : '1024x1024';
 
   const prompt = bgStyle
-    ? `Create a product showcase background image:
+    ? `Create a seamless PATTERNED background image:
 
 ${bgStyle}
 
-Additional rules:
-- The CENTER 60% should be the lightest/cleanest area (products will be placed there)
-- The EDGES and CORNERS should have the decorative motifs and richer colors
-- Include a thin elegant decorative border/frame
-- Make it COLORFUL and VISUALLY STRIKING — premium Etsy listing quality
-- NO text, NO words, NO letters, NO logos, NO characters, NO faces, NO objects
-- Only decorative elements: patterns, shapes, textures, gradients, motifs, sparkles, frames`
-    : `Create a beautiful themed product showcase background for "${theme}".
-Use ${accentColor} as accent color, ${bgColor} as base tone.
-Colorful decorative border around edges, clean lighter center for products.
-Premium Etsy listing quality. NO text, NO logos, NO characters, NO faces.
-Only abstract decorative elements, patterns, motifs, gradients, sparkles.`;
+IMPORTANT:
+- This is a REPEATING PATTERN like wallpaper or gift wrapping paper
+- The motifs/icons should be SMALL, COLORFUL, and evenly SCATTERED across the entire image
+- All motifs should be simple FLAT colored shapes/silhouettes (not detailed illustrations)
+- The pattern should be slightly LIGHTER/SPARSER in the center area
+- Make it look like premium decorative paper you'd find at a gift shop
+- NO text, NO words, NO letters, NO realistic characters, NO faces
+- Only simple iconic shapes and motifs as a pattern`
+    : `Create a colorful patterned background for "${theme}" products.
+Small themed motifs (icons, shapes, silhouettes) in ${accentColor} tones scattered like wallpaper on a ${bgColor} background.
+Pattern should be lighter in center, denser at edges. Simple flat colored shapes.
+NO text, NO faces, NO realistic characters. Premium gift-wrap quality pattern.`;
 
   const response = await fetch('https://api.openai.com/v1/images/generations', {
     method: 'POST',
