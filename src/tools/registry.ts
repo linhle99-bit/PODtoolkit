@@ -23,6 +23,16 @@ const tools: ToolInfo[] = [
     category: 'Mockup',
   },
   {
+    id: 'bundle-generator',
+    name: 'Bundle Generator',
+    description: 'Create mockup bundles for Etsy, Creative Market',
+    icon: '📦',
+    path: '/bundle-generator',
+    component: lazy(() => import('./bundle-generator')),
+    category: 'Mockup',
+    isNew: true,
+  },
+  {
     id: 'image-prompt-generator',
     name: 'Image Prompt Generator',
     description: 'AI phân tích thiết kế POD, tự động tạo ảnh tương tự qua DALL-E',
