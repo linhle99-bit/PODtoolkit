@@ -14,6 +14,16 @@ export interface ToolInfo {
 
 const tools: ToolInfo[] = [
   {
+    id: 'image-prompt-generator',
+    name: 'Image Prompt Generator',
+    description: 'Analyze POD designs with AI → auto-generate similar images via DALL-E',
+    icon: '\uD83C\uDFA8',
+    path: '/image-prompt-generator',
+    component: lazy(() => import('./image-prompt-generator')),
+    category: 'AI',
+    isNew: true,
+  },
+  {
     id: 'mockup-generator',
     name: 'Mockup Generator',
     description: 'Place designs onto t-shirt mockups in batch',
