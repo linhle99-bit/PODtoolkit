@@ -54,6 +54,7 @@ export default function BundleGenerator() {
         backgroundColor: result.background_color,
         accentColor: result.accent_color,
         titleColor: result.title_color,
+        cardColor: result.card_color || '#FFFFFF',
       }));
     } catch (err) {
       alert(`Claude analysis failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
@@ -67,9 +68,10 @@ export default function BundleGenerator() {
     setBgLoading(true);
     try {
       const theme = aiResult?.theme || config.title || 'professional product showcase';
+      const bgStyle = aiResult?.bg_style;
       const result = await generateBackground(
         apiKey, theme, config.accentColor, config.backgroundColor,
-        config.width, config.height,
+        config.width, config.height, bgStyle,
       );
       const bgImg = await loadImage(result.dataUrl);
       setConfig((prev) => ({ ...prev, backgroundImage: bgImg }));

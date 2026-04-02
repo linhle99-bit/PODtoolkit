@@ -13,33 +13,38 @@ export async function generateBackground(
   apiKey: string,
   theme: string,
   accentColor: string,
-  _bgColor: string,
+  bgColor: string,
   width: number,
   height: number,
+  bgStyle?: string,
 ): Promise<BgGenResult> {
   const isLandscape = width > height;
-  const aspect = isLandscape ? 'landscape' : 'square';
-  // DALL-E 3 supported sizes: 1024x1024, 1024x1792, 1792x1024
   const size = isLandscape ? '1792x1024' : '1024x1024';
 
-  const prompt = `Create an elegant background with SUBTLE themed decorations for a "${theme}" product listing.
+  const styleDesc = bgStyle || `elegant themed background matching "${theme}" with ${accentColor} accents`;
 
-Base: soft warm cream/beige (#FFF8F0) solid color filling the entire image.
-Accent: ${accentColor}
-Orientation: ${aspect}
+  const prompt = `Create a beautiful product showcase background.
 
-DECORATIONS (themed to "${theme}"):
-- Small, delicate, PASTEL-COLORED motifs scattered ONLY around the edges and corners
-- For Disney: tiny pastel mickey head silhouettes, small stars, thin castle outlines, subtle sparkle dots — all in soft pastel colors (light pink, baby blue, soft gold, lavender)
-- For vintage: light sepia flourishes at corners, thin ornate line border
-- For floral: soft watercolor petals along edges
-- These motifs should be SMALL (each under 5% of the image), SOFT PASTEL tones, evenly spaced around the border area
-- A thin elegant decorative line border about 3% from the edges
-- The CENTER 75% must be COMPLETELY CLEAN — just the solid cream background, nothing else
-- Overall feeling: soft, elegant, like premium stationery or invitation card
-- Colors must be PASTEL and MUTED — no vivid, no neon, no saturated colors
-- NO text, NO logos, NO characters, NO objects — only abstract motifs and shapes
-- Think: Etsy listing background that looks expensive but doesn't distract from products`;
+STYLE: ${styleDesc}
+Theme: ${theme}
+Base color: ${bgColor}, Accent: ${accentColor}
+
+LAYOUT RULES:
+- The CENTER 65-70% of the image should be LIGHTER/CLEANER (products go here)
+- The EDGES and BORDERS should have the colorful decorations and motifs
+- Create a natural GRADIENT from decorative edges → clean center
+- Add a thin elegant border/frame line that matches the style
+- The decorations should be THEMED: use motifs, shapes, and patterns that match "${theme}"
+
+COLOR RULES:
+- Be COLORFUL and BEAUTIFUL — use the accent color ${accentColor} and complementary tones
+- The edges can be rich and detailed, the center should be soft and light
+- Overall the image should feel PREMIUM, UNIQUE, and VISUALLY STRIKING
+
+STRICT RULES:
+- NO text, NO words, NO letters, NO logos, NO characters, NO faces
+- NO product mockups, NO placeholder rectangles
+- Only decorative elements: patterns, shapes, textures, gradients, motifs, sparkles, borders`;
 
   const response = await fetch('https://api.openai.com/v1/images/generations', {
     method: 'POST',

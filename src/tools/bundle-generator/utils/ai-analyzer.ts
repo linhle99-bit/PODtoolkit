@@ -9,6 +9,8 @@ export interface AiAnalysisResult {
   background_color: string;
   accent_color: string;
   title_color: string;
+  card_color: string;
+  bg_style: string;
   style_notes: string;
 }
 
@@ -23,7 +25,6 @@ async function imageToBase64(src: string, maxSize = 512): Promise<string> {
       canvas.height = Math.round(img.naturalHeight * scale);
       const ctx = canvas.getContext('2d')!;
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      // Get base64 without prefix
       const dataUrl = canvas.toDataURL('image/png');
       resolve(dataUrl.split(',')[1]);
     };
@@ -36,7 +37,6 @@ export async function analyzeDesigns(
   imageSrcs: string[],
   apiKey: string,
 ): Promise<AiAnalysisResult> {
-  // Send up to 4 images to keep token usage low
   const sample = imageSrcs.slice(0, 4);
   const totalCount = imageSrcs.length;
 
@@ -60,24 +60,27 @@ export async function analyzeDesigns(
       type: 'text' as const,
       text: `Analyze these ${totalCount} design images (showing ${sample.length} samples).
 
-Determine the overall THEME and STYLE of these designs, then suggest a complete mockup bundle styling.
+Determine the overall THEME and STYLE, then suggest COMPLETE mockup bundle styling.
 
-Return ONLY valid JSON (no markdown, no explanation) with exactly these keys:
+Return ONLY valid JSON (no markdown) with these keys:
 {
-    "bundle_name": "A catchy, marketable bundle name in English",
-    "theme": "Brief theme description",
-    "background_color": "#hex color that complements the designs",
-    "accent_color": "#hex color for the badge (eye-catching, matches theme)",
-    "title_color": "#hex color for title text (readable on the background)",
-    "style_notes": "Brief description of why these colors/style were chosen"
+    "bundle_name": "Catchy marketable name in English",
+    "theme": "Brief theme description (e.g. disney princess, vintage cartoon, boho floral)",
+    "background_color": "#hex - the dominant background color for the mockup",
+    "accent_color": "#hex - eye-catching badge color that matches theme",
+    "title_color": "#hex - title text color, readable on background",
+    "card_color": "#hex - semi-transparent card behind each design, should be a LIGHT tint of the theme (e.g. light pink for princess, light gold for vintage, light blue for ocean theme). NOT always white.",
+    "bg_style": "A creative one-line description for the AI background generator. Be SPECIFIC and COLORFUL. Examples: 'soft pink watercolor wash with golden sparkle dots and tiny crown motifs', 'warm golden parchment with vintage scroll borders and star patterns', 'dreamy pastel rainbow gradient with subtle heart shapes', 'deep navy sky with golden star constellations and moon crescents'. Match the designs' mood and energy level.",
+    "style_notes": "Brief reasoning"
 }
 
-Guidelines:
-- Vintage/retro → warm tones, cream backgrounds (#F5E6D3, #FFF8F0)
-- Y2K/aesthetic → pastel or bold neon accents, light backgrounds
-- Cartoon/fun → bright playful colors, clean backgrounds
-- Elegant/luxury → dark backgrounds, gold accents
-- Nature/floral → earthy greens, soft sage backgrounds`,
+Be CREATIVE with bg_style — each bundle should feel UNIQUE. Match the energy:
+- Princess/feminine designs → soft pinks, lavenders, sparkles, crowns
+- Adventure/action → bold blues, oranges, dynamic shapes
+- Vintage/retro → warm golds, sepia tones, ornate borders
+- Nature/animals → earthy greens, leaf patterns, organic shapes
+- Cute/kawaii → bright pastels, rainbow, bubble shapes
+- Dark/gothic → deep purples, dark teal, mystical elements`,
     },
   ];
 
@@ -91,7 +94,7 @@ Guidelines:
     },
     body: JSON.stringify({
       model: 'claude-sonnet-4-6',
-      max_tokens: 500,
+      max_tokens: 600,
       messages: [{ role: 'user', content }],
     }),
   });
@@ -106,7 +109,6 @@ Guidelines:
   const data = await response.json();
   let raw: string = data.content?.[0]?.text || '';
 
-  // Strip markdown fences if present
   if (raw.startsWith('```')) {
     raw = raw.split('\n').slice(1).join('\n');
     raw = raw.replace(/```\s*$/, '');

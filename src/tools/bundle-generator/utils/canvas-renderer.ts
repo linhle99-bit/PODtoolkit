@@ -20,6 +20,8 @@ export interface BundleConfig {
   badgeFontSize: number;
   /** Optional AI-generated background image */
   backgroundImage?: HTMLImageElement | null;
+  /** Card color behind each design (default white) */
+  cardColor: string;
 }
 
 export const DEFAULT_CONFIG: BundleConfig = {
@@ -36,6 +38,7 @@ export const DEFAULT_CONFIG: BundleConfig = {
   rotationRange: [-12, 12],
   titleFontSize: 160,
   badgeFontSize: 96,
+  cardColor: '#FFFFFF',
 };
 
 /* ── font loading ───────────────────────────────────────── */
@@ -237,6 +240,7 @@ function drawImageWithShadow(
   dx: number, dy: number, dw: number, dh: number,
   rotation = 0,
   hasBgImage = false,
+  cardColor = '#FFFFFF',
 ) {
   ctx.save();
   const cx = dx + dw / 2;
@@ -248,19 +252,20 @@ function drawImageWithShadow(
     ctx.translate(-cx, -cy);
   }
 
-  // Bright white glow behind design so it pops on any background
+  // Colored card behind design so it pops on any background
   if (hasBgImage) {
-    const glowPad = Math.max(dw, dh) * 0.08;
-    // Solid white base
-    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    const [cr, cg, cb] = hexToRgb(cardColor);
+    const glowPad = Math.max(dw, dh) * 0.06;
+    // Solid card
+    ctx.fillStyle = `rgba(${cr},${cg},${cb},0.88)`;
     ctx.beginPath();
-    ctx.roundRect(dx - glowPad, dy - glowPad, dw + glowPad * 2, dh + glowPad * 2, 12);
+    ctx.roundRect(dx - glowPad, dy - glowPad, dw + glowPad * 2, dh + glowPad * 2, 16);
     ctx.fill();
-    // Soft edge glow
-    const outerPad = glowPad + Math.max(dw, dh) * 0.04;
-    const grad = ctx.createRadialGradient(cx, cy, Math.min(dw, dh) * 0.4, cx, cy, Math.max(dw, dh) * 0.62 + outerPad);
-    grad.addColorStop(0, 'rgba(255,255,255,0.5)');
-    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    // Soft glow edge
+    const outerPad = glowPad + Math.max(dw, dh) * 0.03;
+    const grad = ctx.createRadialGradient(cx, cy, Math.min(dw, dh) * 0.4, cx, cy, Math.max(dw, dh) * 0.6 + outerPad);
+    grad.addColorStop(0, `rgba(${cr},${cg},${cb},0.4)`);
+    grad.addColorStop(1, `rgba(${cr},${cg},${cb},0)`);
     ctx.fillStyle = grad;
     ctx.fillRect(dx - outerPad, dy - outerPad, dw + outerPad * 2, dh + outerPad * 2);
   }
@@ -324,7 +329,7 @@ function renderGrid(
     const dx = cellX + (cellW - fit.w) / 2;
     const dy = cellY + (cellH - fit.h) / 2;
 
-    drawImageWithShadow(ctx, img, crop, dx, dy, fit.w, fit.h, 0, hasBgImage);
+    drawImageWithShadow(ctx, img, crop, dx, dy, fit.w, fit.h, 0, hasBgImage, config.cardColor);
   });
 }
 
@@ -404,7 +409,7 @@ function renderCollage(
     const fit = fitSize(crop.sw, crop.sh, p.w, p.h);
     const dx = p.x - fit.w / 2;
     const dy = p.y - fit.h / 2;
-    drawImageWithShadow(ctx, p.img, crop, dx, dy, fit.w, fit.h, p.rotation, hasBgImage);
+    drawImageWithShadow(ctx, p.img, crop, dx, dy, fit.w, fit.h, p.rotation, hasBgImage, config.cardColor);
   }
 }
 
