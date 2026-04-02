@@ -22,24 +22,26 @@ export async function generateBackground(
   // DALL-E 3 supported sizes: 1024x1024, 1024x1792, 1792x1024
   const size = isLandscape ? '1792x1024' : '1024x1024';
 
-  const prompt = `Create a VERY SUBTLE, MINIMAL background texture for a product listing image.
+  const prompt = `Create a themed background for a "${theme}" product showcase image.
 
-Theme: ${theme}
 Base color: ${bgColor}
-Accent: ${accentColor}
+Accent color: ${accentColor}
 Orientation: ${aspect}
 
-CRITICAL RULES:
-- 90% of the image must be a CLEAN, FLAT, SOLID color close to ${bgColor}
-- Only VERY FAINT decorative elements at the 4 CORNERS (tiny flourishes, small ornaments)
-- Optionally a VERY THIN elegant border/frame line near the edges
-- The entire CENTER must be COMPLETELY EMPTY and CLEAN - nothing there
-- Think: luxury stationery paper, elegant invitation card background
-- EXTREMELY subtle texture only (like fine paper grain or very light watercolor wash)
-- NO busy patterns, NO illustrations, NO heavy decorations, NO bokeh, NO sparkles
-- NO text, NO logos, NO objects
-- The result should look like a premium solid-color paper with barely-visible corner decorations
-- Less is more - this is a BACKGROUND, the products placed on top must be the star`;
+DESIGN RULES:
+- The CENTER 70% of the image must be CLEAN and MOSTLY EMPTY (products will be placed there)
+- Around the EDGES and CORNERS: place THEME-SPECIFIC decorative elements related to "${theme}"
+  For example if Disney theme: faint castle silhouettes, tiny stars, sparkle trails, magic wand shapes
+  If vintage/retro: aged paper texture, retro borders, film grain
+  If floral: delicate flower vines along edges
+  If Y2K: geometric shapes, gradient blobs at corners
+- These decorations should be SEMI-TRANSPARENT (20-40% opacity), like watermarks
+- Use ${accentColor} tints for the decorative elements
+- The base must be a smooth gradient/solid close to ${bgColor}
+- Add a THIN elegant decorative border/frame near the edges that matches the theme
+- Overall: premium, high-end, marketplace-ready (Etsy/Creative Market style)
+- NO text, NO logos, NO product mockups
+- The decorations should ENHANCE the theme but never compete with the products placed on top`;
 
   const response = await fetch('https://api.openai.com/v1/images/generations', {
     method: 'POST',

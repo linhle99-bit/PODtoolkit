@@ -205,6 +205,7 @@ function drawImageWithShadow(
   crop: { sx: number; sy: number; sw: number; sh: number },
   dx: number, dy: number, dw: number, dh: number,
   rotation = 0,
+  hasBgImage = false,
 ) {
   ctx.save();
   const cx = dx + dw / 2;
@@ -214,6 +215,17 @@ function drawImageWithShadow(
     ctx.translate(cx, cy);
     ctx.rotate((rotation * Math.PI) / 180);
     ctx.translate(-cx, -cy);
+  }
+
+  // White glow behind design so it pops (especially on AI backgrounds)
+  if (hasBgImage) {
+    const glowPad = Math.max(dw, dh) * 0.12;
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(dw, dh) * 0.65 + glowPad);
+    grad.addColorStop(0, 'rgba(255,255,255,0.7)');
+    grad.addColorStop(0.6, 'rgba(255,255,255,0.25)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(dx - glowPad, dy - glowPad, dw + glowPad * 2, dh + glowPad * 2);
   }
 
   // Soft shadow
@@ -239,6 +251,7 @@ function renderGrid(
   ctx: CanvasRenderingContext2D,
   images: HTMLImageElement[],
   config: BundleConfig,
+  hasBgImage: boolean,
 ) {
   const { width: W, height: H, padding, gap, headerRatio } = config;
   const headerH = Math.round(H * headerRatio);
@@ -274,7 +287,7 @@ function renderGrid(
     const dx = cellX + (cellW - fit.w) / 2;
     const dy = cellY + (cellH - fit.h) / 2;
 
-    drawImageWithShadow(ctx, img, crop, dx, dy, fit.w, fit.h);
+    drawImageWithShadow(ctx, img, crop, dx, dy, fit.w, fit.h, 0, hasBgImage);
   });
 }
 
@@ -284,6 +297,7 @@ function renderCollage(
   ctx: CanvasRenderingContext2D,
   images: HTMLImageElement[],
   config: BundleConfig,
+  hasBgImage: boolean,
 ) {
   const { width: W, height: H, padding, headerRatio, rotationRange } = config;
   const headerH = Math.round(H * headerRatio);
@@ -353,7 +367,7 @@ function renderCollage(
     const fit = fitSize(crop.sw, crop.sh, p.w, p.h);
     const dx = p.x - fit.w / 2;
     const dy = p.y - fit.h / 2;
-    drawImageWithShadow(ctx, p.img, crop, dx, dy, fit.w, fit.h, p.rotation);
+    drawImageWithShadow(ctx, p.img, crop, dx, dy, fit.w, fit.h, p.rotation, hasBgImage);
   }
 }
 
@@ -394,9 +408,9 @@ export function renderBundle(
 
   // Layout
   if (config.layout === 'grid') {
-    renderGrid(ctx, images, config);
+    renderGrid(ctx, images, config, !!hasBgImage);
   } else {
-    renderCollage(ctx, images, config);
+    renderCollage(ctx, images, config, !!hasBgImage);
   }
 
   // Frosted header bar behind title for readability
