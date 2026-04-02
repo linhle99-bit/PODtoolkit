@@ -38,6 +38,38 @@ export const DEFAULT_CONFIG: BundleConfig = {
   badgeFontSize: 96,
 };
 
+/* ── font loading ───────────────────────────────────────── */
+
+const FONT_LOADED = { badge: false, title: false };
+
+async function loadGoogleFont(family: string, weight = '700'): Promise<void> {
+  const url = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:wght@${weight}&display=swap`;
+  const css = await fetch(url).then(r => r.text());
+  // Extract font URL from CSS
+  const match = css.match(/url\(([^)]+)\)/);
+  if (!match) return;
+  const fontUrl = match[1];
+  const font = new FontFace(family, `url(${fontUrl})`, { weight });
+  const loaded = await font.load();
+  document.fonts.add(loaded);
+}
+
+export async function preloadFonts(): Promise<void> {
+  try {
+    await Promise.all([
+      loadGoogleFont('Playfair Display', '700'),
+      loadGoogleFont('Poppins', '700'),
+    ]);
+    FONT_LOADED.title = true;
+    FONT_LOADED.badge = true;
+  } catch {
+    // Fallback to system fonts
+  }
+}
+
+const TITLE_FONT = '"Playfair Display", Georgia, "Times New Roman", serif';
+const BADGE_FONT = '"Poppins", "Segoe UI", Arial, sans-serif';
+
 /* ── helpers ────────────────────────────────────────────── */
 
 function autoCropTransparent(
@@ -141,7 +173,7 @@ function drawHeader(
   const headerH = Math.round(config.height * headerRatio);
 
   // Badge
-  ctx.font = `bold ${badgeFontSize}px "Segoe UI", Arial, Helvetica, sans-serif`;
+  ctx.font = `bold ${badgeFontSize}px ${BADGE_FONT}`;
   const badgeText = `${imageCount} Designs`;
   const btm = ctx.measureText(badgeText);
   const btw = btm.width;
@@ -173,13 +205,13 @@ function drawHeader(
 
   // Title
   let fontSize = titleFontSize;
-  ctx.font = `bold ${fontSize}px "Segoe UI", Arial, Helvetica, sans-serif`;
+  ctx.font = `bold ${fontSize}px ${TITLE_FONT}`;
   let ttm = ctx.measureText(title);
 
   // Auto-shrink if too wide
   if (ttm.width > W * 0.88) {
     fontSize = Math.round(fontSize * (W * 0.85) / ttm.width);
-    ctx.font = `bold ${fontSize}px "Segoe UI", Arial, Helvetica, sans-serif`;
+    ctx.font = `bold ${fontSize}px ${TITLE_FONT}`;
     ttm = ctx.measureText(title);
   }
 
@@ -217,15 +249,21 @@ function drawImageWithShadow(
     ctx.translate(-cx, -cy);
   }
 
-  // White glow behind design so it pops (especially on AI backgrounds)
+  // Bright white glow behind design so it pops on any background
   if (hasBgImage) {
-    const glowPad = Math.max(dw, dh) * 0.12;
-    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(dw, dh) * 0.65 + glowPad);
-    grad.addColorStop(0, 'rgba(255,255,255,0.7)');
-    grad.addColorStop(0.6, 'rgba(255,255,255,0.25)');
+    const glowPad = Math.max(dw, dh) * 0.08;
+    // Solid white base
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.beginPath();
+    ctx.roundRect(dx - glowPad, dy - glowPad, dw + glowPad * 2, dh + glowPad * 2, 12);
+    ctx.fill();
+    // Soft edge glow
+    const outerPad = glowPad + Math.max(dw, dh) * 0.04;
+    const grad = ctx.createRadialGradient(cx, cy, Math.min(dw, dh) * 0.4, cx, cy, Math.max(dw, dh) * 0.62 + outerPad);
+    grad.addColorStop(0, 'rgba(255,255,255,0.5)');
     grad.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = grad;
-    ctx.fillRect(dx - glowPad, dy - glowPad, dw + glowPad * 2, dh + glowPad * 2);
+    ctx.fillRect(dx - outerPad, dy - outerPad, dw + outerPad * 2, dh + outerPad * 2);
   }
 
   // Soft shadow
@@ -394,13 +432,7 @@ export function renderBundle(
     const by = (config.height - bh) / 2;
     ctx.drawImage(bgImg, bx, by, bw, bh);
 
-    // Semi-transparent overlay on designs area so designs pop
-    const headerH = Math.round(config.height * config.headerRatio);
-    const [bgR, bgG, bgB] = hexToRgb(config.backgroundColor);
-    const designsY = headerH;
-    const designsH = config.height - headerH;
-    ctx.fillStyle = `rgba(${bgR},${bgG},${bgB},0.55)`;
-    ctx.fillRect(0, designsY, config.width, designsH);
+    // No full overlay - each design gets its own white card backing
   } else {
     drawBackground(ctx, config.width, config.height, config.backgroundColor);
     drawDecoFrame(ctx, config.width, config.height, config.accentColor, config.padding / 2);
@@ -413,12 +445,11 @@ export function renderBundle(
     renderCollage(ctx, images, config, !!hasBgImage);
   }
 
-  // Frosted header bar behind title for readability
+  // Strong white header bar behind title
   if (hasBgImage) {
     const headerH = Math.round(config.height * config.headerRatio);
-    const [bgR, bgG, bgB] = hexToRgb(config.backgroundColor);
-    ctx.fillStyle = `rgba(${bgR},${bgG},${bgB},0.75)`;
-    ctx.fillRect(0, 0, config.width, headerH);
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.fillRect(0, 0, config.width, headerH + 10);
   }
 
   // Header on top

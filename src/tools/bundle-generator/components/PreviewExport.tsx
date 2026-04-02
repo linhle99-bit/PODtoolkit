@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import type { BundleConfig } from '../utils/canvas-renderer';
-import { renderBundle, canvasToBlob } from '../utils/canvas-renderer';
+import { renderBundle, canvasToBlob, preloadFonts } from '../utils/canvas-renderer';
 
 interface Props {
   imageSrcs: string[];
@@ -13,6 +13,12 @@ export default function PreviewExport({ imageSrcs, config }: Props) {
   const [rendering, setRendering] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [loadedImages, setLoadedImages] = useState<HTMLImageElement[]>([]);
+  const [fontsReady, setFontsReady] = useState(false);
+
+  // Preload Google Fonts
+  useEffect(() => {
+    preloadFonts().then(() => setFontsReady(true));
+  }, []);
 
   // Load images
   useEffect(() => {
@@ -34,7 +40,7 @@ export default function PreviewExport({ imageSrcs, config }: Props) {
 
   // Render preview (scaled down)
   useEffect(() => {
-    if (loadedImages.length === 0 || !previewRef.current) return;
+    if (loadedImages.length === 0 || !previewRef.current || !fontsReady) return;
 
     setRendering(true);
 
@@ -62,7 +68,7 @@ export default function PreviewExport({ imageSrcs, config }: Props) {
       }
       setRendering(false);
     });
-  }, [loadedImages, config]);
+  }, [loadedImages, config, fontsReady]);
 
   // Export full-size PNG
   const handleExport = useCallback(async () => {

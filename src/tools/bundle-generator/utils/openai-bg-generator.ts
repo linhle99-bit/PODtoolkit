@@ -13,7 +13,7 @@ export async function generateBackground(
   apiKey: string,
   theme: string,
   accentColor: string,
-  bgColor: string,
+  _bgColor: string,
   width: number,
   height: number,
 ): Promise<BgGenResult> {
@@ -22,26 +22,25 @@ export async function generateBackground(
   // DALL-E 3 supported sizes: 1024x1024, 1024x1792, 1792x1024
   const size = isLandscape ? '1792x1024' : '1024x1024';
 
-  const prompt = `Create a themed background for a "${theme}" product showcase image.
+  const prompt = `Create a COLORFUL, VIBRANT themed border/frame background for "${theme}" products.
 
-Base color: ${bgColor}
 Accent color: ${accentColor}
 Orientation: ${aspect}
 
-DESIGN RULES:
-- The CENTER 70% of the image must be CLEAN and MOSTLY EMPTY (products will be placed there)
-- Around the EDGES and CORNERS: place THEME-SPECIFIC decorative elements related to "${theme}"
-  For example if Disney theme: faint castle silhouettes, tiny stars, sparkle trails, magic wand shapes
-  If vintage/retro: aged paper texture, retro borders, film grain
-  If floral: delicate flower vines along edges
-  If Y2K: geometric shapes, gradient blobs at corners
-- These decorations should be SEMI-TRANSPARENT (20-40% opacity), like watermarks
-- Use ${accentColor} tints for the decorative elements
-- The base must be a smooth gradient/solid close to ${bgColor}
-- Add a THIN elegant decorative border/frame near the edges that matches the theme
-- Overall: premium, high-end, marketplace-ready (Etsy/Creative Market style)
-- NO text, NO logos, NO product mockups
-- The decorations should ENHANCE the theme but never compete with the products placed on top`;
+DESIGN:
+- BEAUTIFUL COLORFUL decorative BORDER/FRAME around ALL 4 edges of the image
+- The border should be RICH, DETAILED, and THEMED to "${theme}"
+  Disney theme: colorful castle towers, stars, fireworks, magic sparkles, character silhouettes in vivid colors
+  Vintage: ornate golden frames, rich warm textures, decorative scrollwork
+  Floral: lush colorful flower garlands, vines, petals
+  Y2K: bold neon gradients, geometric patterns, holographic effects
+- The border/frame should be 15-20% of each edge, COLORFUL and VIVID (not faded/transparent)
+- CENTER of the image: PURE CLEAN WHITE or very light color (#FFFFFF or #FFFDF8) - completely empty
+- Sharp contrast between the colorful border and the clean white center
+- Think: premium picture frame effect - ornate colorful frame with clean white mat inside
+- Use vibrant colors that match ${accentColor} palette
+- NO text, NO logos, NO mockup products
+- The frame should look EXPENSIVE, PREMIUM, like a high-end product showcase`;
 
   const response = await fetch('https://api.openai.com/v1/images/generations', {
     method: 'POST',
