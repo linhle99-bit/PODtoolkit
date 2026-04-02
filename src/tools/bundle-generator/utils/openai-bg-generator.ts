@@ -21,30 +21,23 @@ export async function generateBackground(
   const isLandscape = width > height;
   const size = isLandscape ? '1792x1024' : '1024x1024';
 
-  const styleDesc = bgStyle || `elegant themed background matching "${theme}" with ${accentColor} accents`;
+  const prompt = bgStyle
+    ? `Create a product showcase background image:
 
-  const prompt = `Create a beautiful product showcase background.
+${bgStyle}
 
-STYLE: ${styleDesc}
-Theme: ${theme}
-Base color: ${bgColor}, Accent: ${accentColor}
-
-LAYOUT RULES:
-- The CENTER 65-70% of the image should be LIGHTER/CLEANER (products go here)
-- The EDGES and BORDERS should have the colorful decorations and motifs
-- Create a natural GRADIENT from decorative edges → clean center
-- Add a thin elegant border/frame line that matches the style
-- The decorations should be THEMED: use motifs, shapes, and patterns that match "${theme}"
-
-COLOR RULES:
-- Be COLORFUL and BEAUTIFUL — use the accent color ${accentColor} and complementary tones
-- The edges can be rich and detailed, the center should be soft and light
-- Overall the image should feel PREMIUM, UNIQUE, and VISUALLY STRIKING
-
-STRICT RULES:
-- NO text, NO words, NO letters, NO logos, NO characters, NO faces
-- NO product mockups, NO placeholder rectangles
-- Only decorative elements: patterns, shapes, textures, gradients, motifs, sparkles, borders`;
+Additional rules:
+- The CENTER 60% should be the lightest/cleanest area (products will be placed there)
+- The EDGES and CORNERS should have the decorative motifs and richer colors
+- Include a thin elegant decorative border/frame
+- Make it COLORFUL and VISUALLY STRIKING — premium Etsy listing quality
+- NO text, NO words, NO letters, NO logos, NO characters, NO faces, NO objects
+- Only decorative elements: patterns, shapes, textures, gradients, motifs, sparkles, frames`
+    : `Create a beautiful themed product showcase background for "${theme}".
+Use ${accentColor} as accent color, ${bgColor} as base tone.
+Colorful decorative border around edges, clean lighter center for products.
+Premium Etsy listing quality. NO text, NO logos, NO characters, NO faces.
+Only abstract decorative elements, patterns, motifs, gradients, sparkles.`;
 
   const response = await fetch('https://api.openai.com/v1/images/generations', {
     method: 'POST',

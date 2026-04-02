@@ -37,7 +37,8 @@ export async function analyzeDesigns(
   imageSrcs: string[],
   apiKey: string,
 ): Promise<AiAnalysisResult> {
-  const sample = imageSrcs.slice(0, 4);
+  // Send up to 8 images for better analysis (thumbnails are small)
+  const sample = imageSrcs.slice(0, 8);
   const totalCount = imageSrcs.length;
 
   const imageContents = await Promise.all(
@@ -58,29 +59,23 @@ export async function analyzeDesigns(
     ...imageContents.filter((ic) => ic.source.data),
     {
       type: 'text' as const,
-      text: `Analyze these ${totalCount} design images (showing ${sample.length} samples).
+      text: `You are a professional mockup bundle designer for Etsy/Creative Market.
 
-Determine the overall THEME and STYLE, then suggest COMPLETE mockup bundle styling.
+Carefully analyze ALL ${totalCount} design images (showing ${sample.length}). Study the colors, characters, art style, mood, and subject matter deeply.
 
-Return ONLY valid JSON (no markdown) with these keys:
+Return ONLY valid JSON (no markdown, no explanation):
 {
-    "bundle_name": "Catchy marketable name in English",
-    "theme": "Brief theme description (e.g. disney princess, vintage cartoon, boho floral)",
-    "background_color": "#hex - the dominant background color for the mockup",
-    "accent_color": "#hex - eye-catching badge color that matches theme",
-    "title_color": "#hex - title text color, readable on background",
-    "card_color": "#hex - semi-transparent card behind each design, should be a LIGHT tint of the theme (e.g. light pink for princess, light gold for vintage, light blue for ocean theme). NOT always white.",
-    "bg_style": "A creative one-line description for the AI background generator. Be SPECIFIC and COLORFUL. Examples: 'soft pink watercolor wash with golden sparkle dots and tiny crown motifs', 'warm golden parchment with vintage scroll borders and star patterns', 'dreamy pastel rainbow gradient with subtle heart shapes', 'deep navy sky with golden star constellations and moon crescents'. Match the designs' mood and energy level.",
-    "style_notes": "Brief reasoning"
+    "bundle_name": "Catchy 3-5 word marketable name",
+    "theme": "Specific theme (e.g. 'disney princess watercolor', 'retro 90s cartoon', 'boho wildflower')",
+    "background_color": "#hex - base color that COMPLEMENTS the designs. NOT always cream/beige. Choose based on actual design colors. Pink designs → soft pink bg. Blue designs → light blue bg. Colorful designs → warm neutral.",
+    "accent_color": "#hex - VIBRANT badge color. Pull from the dominant color IN the designs themselves.",
+    "title_color": "#hex - readable on background, should MATCH the theme mood",
+    "card_color": "#hex - LIGHT TINT matching the designs. For princess → #FFF0F5 (lavender blush). For ocean → #F0F8FF. For vintage → #FFF8DC. For nature → #F0FFF0. NEVER plain #FFFFFF.",
+    "bg_style": "DETAILED 2-3 sentence description for DALL-E to generate a UNIQUE background. Describe: (1) the color palette/gradient (2) specific decorative motifs related to the theme (3) the overall mood/texture. Be VERY SPECIFIC about colors and shapes. Example for princess theme: 'Soft gradient from blush pink at edges to pale lavender center. Scattered tiny golden crowns, glass slipper silhouettes, and rose petals along the borders. Delicate golden filigree frame with small heart accents at corners.'",
+    "style_notes": "Why these choices"
 }
 
-Be CREATIVE with bg_style — each bundle should feel UNIQUE. Match the energy:
-- Princess/feminine designs → soft pinks, lavenders, sparkles, crowns
-- Adventure/action → bold blues, oranges, dynamic shapes
-- Vintage/retro → warm golds, sepia tones, ornate borders
-- Nature/animals → earthy greens, leaf patterns, organic shapes
-- Cute/kawaii → bright pastels, rainbow, bubble shapes
-- Dark/gothic → deep purples, dark teal, mystical elements`,
+CRITICAL: bg_style must be DIFFERENT for every theme. Study the actual designs carefully. Do NOT default to generic beige/cream. Each bundle must look completely unique.`,
     },
   ];
 
@@ -94,7 +89,7 @@ Be CREATIVE with bg_style — each bundle should feel UNIQUE. Match the energy:
     },
     body: JSON.stringify({
       model: 'claude-sonnet-4-6',
-      max_tokens: 600,
+      max_tokens: 800,
       messages: [{ role: 'user', content }],
     }),
   });
