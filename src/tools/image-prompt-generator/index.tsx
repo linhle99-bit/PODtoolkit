@@ -207,8 +207,16 @@ export default function ImagePromptGenerator() {
             </div>
             <p className="text-gray-400 text-sm max-w-md mx-auto">
               {lang === 'vi'
-                ? 'Nhập mật khẩu để mở khóa tải về. Liên hệ để mua license.'
-                : 'Enter password to unlock download. Contact us to purchase a license.'}
+                ? 'Nhập mật khẩu để mở khóa tải về. '
+                : 'Enter password to unlock download. '}
+              <a
+                href="https://t.me/cocomanwa"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:text-blue-300 underline"
+              >
+                {lang === 'vi' ? 'Liên hệ Telegram để mua license' : 'Contact via Telegram to purchase'}
+              </a>
             </p>
             <div className="flex items-center justify-center gap-3 max-w-sm mx-auto">
               <input
