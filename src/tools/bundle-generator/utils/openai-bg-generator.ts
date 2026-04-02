@@ -19,8 +19,8 @@ export async function generateBackground(
 ): Promise<BgGenResult> {
   const isLandscape = width > height;
   const aspect = isLandscape ? 'landscape' : 'square';
-  // OpenAI supported sizes
-  const size = isLandscape ? '1536x1024' : '1024x1024';
+  // DALL-E 3 supported sizes: 1024x1024, 1024x1792, 1792x1024
+  const size = isLandscape ? '1792x1024' : '1024x1024';
 
   const prompt = `Create a beautiful, professional product showcase background for an Etsy listing mockup bundle.
 
@@ -47,11 +47,12 @@ Requirements:
       'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: 'gpt-image-1',
+      model: 'dall-e-3',
       prompt,
       n: 1,
       size,
-      quality: 'medium',
+      quality: 'standard',
+      response_format: 'b64_json',
     }),
   });
 
