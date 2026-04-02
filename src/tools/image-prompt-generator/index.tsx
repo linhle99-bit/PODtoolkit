@@ -202,7 +202,7 @@ export default function ImagePromptGenerator() {
             <div className="space-y-2">
               <h2 className="text-xl font-semibold text-white">{t.download}</h2>
               <div className="inline-block bg-yellow-500/20 border border-yellow-500/40 rounded-full px-4 py-1">
-                <span className="text-yellow-400 font-bold text-2xl">$9.99</span>
+                <span className="text-yellow-400 font-bold text-2xl">$19.99</span>
               </div>
             </div>
             <p className="text-gray-400 text-sm max-w-md mx-auto">
