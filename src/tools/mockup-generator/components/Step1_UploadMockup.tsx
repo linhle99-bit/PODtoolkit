@@ -1,14 +1,23 @@
 import { useEffect } from 'react';
 import { useAppStore } from '../store/useAppStore';
+import { useAuth } from '../../../components/Auth/AuthProvider';
 import DropZone from '../../../components/Shared/DropZone';
 import ImageGrid from '../../../components/Shared/ImageGrid';
 
 export default function Step1_UploadMockup() {
-  const { mockups, addMockup, removeMockup, setStep, presets, presetsLoaded, initPresets, loadPreset, deletePreset } = useAppStore();
+  const { mockups, addMockup, removeMockup, setStep, presets, presetsLoaded, initPresets, syncFromCloud, loadPreset, deletePreset } = useAppStore();
+  const { user } = useAuth();
 
   useEffect(() => {
     initPresets();
   }, [initPresets]);
+
+  // Re-sync when user logs in
+  useEffect(() => {
+    if (user && presetsLoaded) {
+      syncFromCloud();
+    }
+  }, [user, presetsLoaded, syncFromCloud]);
 
   const handleFiles = (files: FileList) => {
     Array.from(files)

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { supabase } from '../../../lib/supabase';
 import type { MockupFile, DesignFile, CompositeResult, PrintArea } from '../types';
 
 export interface MockupPreset {
@@ -7,7 +8,7 @@ export interface MockupPreset {
   createdAt: number;
 }
 
-// --- IndexedDB helpers (no size limit unlike localStorage) ---
+// --- IndexedDB helpers (local cache) ---
 const DB_NAME = 'mockup-generator-db';
 const STORE_NAME = 'presets';
 const DB_VERSION = 1;
@@ -63,7 +64,51 @@ async function deletePresetFromDB(name: string): Promise<void> {
   });
 }
 
-// Migrate old localStorage presets to IndexedDB (one-time)
+// --- Supabase cloud sync ---
+async function loadPresetsFromCloud(): Promise<MockupPreset[]> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data, error } = await supabase
+    .from('presets')
+    .select('name, data, created_at')
+    .eq('user_id', user.id);
+
+  if (error || !data) return [];
+
+  return data.map((row) => ({
+    name: row.name,
+    mockups: (row.data as any).mockups || [],
+    createdAt: new Date(row.created_at).getTime(),
+  }));
+}
+
+async function savePresetToCloud(preset: MockupPreset): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await supabase
+    .from('presets')
+    .upsert({
+      user_id: user.id,
+      name: preset.name,
+      data: { mockups: preset.mockups },
+      created_at: new Date(preset.createdAt).toISOString(),
+    }, { onConflict: 'user_id,name' });
+}
+
+async function deletePresetFromCloud(name: string): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await supabase
+    .from('presets')
+    .delete()
+    .eq('user_id', user.id)
+    .eq('name', name);
+}
+
+// Migrate old localStorage presets
 async function migrateFromLocalStorage(): Promise<MockupPreset[]> {
   try {
     const raw = localStorage.getItem('mockup-generator-presets');
@@ -89,6 +134,7 @@ interface AppState {
   total: number;
   presets: MockupPreset[];
   presetsLoaded: boolean;
+  syncing: boolean;
 
   setStep: (step: number) => void;
   addMockup: (mockup: MockupFile) => void;
@@ -102,6 +148,7 @@ interface AppState {
   setProgress: (progress: number, total: number) => void;
   clearResults: () => void;
   initPresets: () => Promise<void>;
+  syncFromCloud: () => Promise<void>;
   savePreset: (name: string) => Promise<void>;
   loadPreset: (name: string) => void;
   deletePreset: (name: string) => Promise<void>;
@@ -117,6 +164,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   total: 0,
   presets: [],
   presetsLoaded: false,
+  syncing: false,
 
   setStep: (step) => set({ currentStep: step }),
   addMockup: (mockup) => set((s) => ({ mockups: [...s.mockups, mockup] })),
@@ -135,18 +183,60 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   initPresets: async () => {
     if (get().presetsLoaded) return;
-    // Migrate old localStorage data first
-    const migrated = await migrateFromLocalStorage();
-    const existing = await loadPresetsFromDB();
-    // Merge: migrated ones are already saved to DB
-    const all = existing.length > 0 ? existing : migrated;
-    set({ presets: all, presetsLoaded: true });
+    await migrateFromLocalStorage();
+    const local = await loadPresetsFromDB();
+    set({ presets: local, presetsLoaded: true });
+
+    // Also try loading from cloud
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      get().syncFromCloud();
+    }
+  },
+
+  syncFromCloud: async () => {
+    set({ syncing: true });
+    try {
+      const cloudPresets = await loadPresetsFromCloud();
+      const localPresets = await loadPresetsFromDB();
+
+      // Merge: cloud wins on conflicts (by name), keep local-only presets
+      const merged = new Map<string, MockupPreset>();
+      for (const p of localPresets) merged.set(p.name, p);
+      for (const p of cloudPresets) merged.set(p.name, p); // cloud overwrites
+
+      const all = Array.from(merged.values());
+
+      // Save merged back to local DB
+      for (const p of all) {
+        await savePresetToDB(p);
+      }
+
+      // Upload local-only presets to cloud
+      const cloudNames = new Set(cloudPresets.map((p) => p.name));
+      for (const p of localPresets) {
+        if (!cloudNames.has(p.name)) {
+          await savePresetToCloud(p);
+        }
+      }
+
+      set({ presets: all });
+    } catch (e) {
+      console.error('Sync error:', e);
+    }
+    set({ syncing: false });
   },
 
   savePreset: async (name) => {
     const { mockups, presets } = get();
     const newPreset: MockupPreset = { name, mockups, createdAt: Date.now() };
+
+    // Save to local DB
     await savePresetToDB(newPreset);
+
+    // Save to cloud if logged in
+    await savePresetToCloud(newPreset);
+
     const updated = [...presets.filter((p) => p.name !== name), newPreset];
     set({ presets: updated });
   },
@@ -161,7 +251,10 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   deletePreset: async (name) => {
     const { presets } = get();
+
     await deletePresetFromDB(name);
+    await deletePresetFromCloud(name);
+
     const updated = presets.filter((p) => p.name !== name);
     set({ presets: updated });
   },
