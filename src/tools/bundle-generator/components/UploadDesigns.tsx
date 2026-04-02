@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import DropZone from '../../../components/Shared/DropZone';
 
 interface Props {
@@ -9,6 +9,8 @@ interface Props {
 }
 
 export default function UploadDesigns({ images, onAdd, onRemove, onClear }: Props) {
+  const folderRef = useRef<HTMLInputElement>(null);
+
   const handleFiles = useCallback(
     (files: FileList) => onAdd(files),
     [onAdd],
@@ -16,12 +18,40 @@ export default function UploadDesigns({ images, onAdd, onRemove, onClear }: Prop
 
   if (images.length === 0) {
     return (
-      <DropZone
-        onFiles={handleFiles}
-        icon="📦"
-        label="Drop your PNG designs here"
-        accept="image/png,image/jpeg,image/webp"
-      />
+      <div className="space-y-3">
+        <DropZone
+          onFiles={handleFiles}
+          icon="📦"
+          label="Drop your PNG designs here"
+          accept="image/png,image/jpeg,image/webp"
+        />
+
+        {/* Folder upload button */}
+        <div className="flex justify-center">
+          <button
+            onClick={() => folderRef.current?.click()}
+            className="flex items-center gap-2 px-5 py-2.5 bg-gray-800/60 border border-gray-700/50 rounded-xl text-sm text-gray-400 hover:text-white hover:border-purple-500/40 transition-all"
+          >
+            <span className="text-base">📂</span>
+            Upload Folder
+          </button>
+          <input
+            ref={folderRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            multiple
+            className="hidden"
+            // @ts-expect-error webkitdirectory is non-standard
+            webkitdirectory=""
+            onChange={(e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                onAdd(e.target.files);
+                e.target.value = '';
+              }
+            }}
+          />
+        </div>
+      </div>
     );
   }
 
@@ -41,7 +71,7 @@ export default function UploadDesigns({ images, onAdd, onRemove, onClear }: Prop
           </div>
         ))}
 
-        {/* Add more */}
+        {/* Add more files */}
         <label className="aspect-square rounded-xl border-2 border-dashed border-gray-700/50 hover:border-purple-500/50 flex items-center justify-center cursor-pointer text-gray-600 hover:text-purple-400 text-2xl transition-colors">
           +
           <input
@@ -49,6 +79,26 @@ export default function UploadDesigns({ images, onAdd, onRemove, onClear }: Prop
             accept="image/png,image/jpeg,image/webp"
             multiple
             className="hidden"
+            onChange={(e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                onAdd(e.target.files);
+                e.target.value = '';
+              }
+            }}
+          />
+        </label>
+
+        {/* Add folder */}
+        <label className="aspect-square rounded-xl border-2 border-dashed border-gray-700/50 hover:border-blue-500/50 flex flex-col items-center justify-center cursor-pointer text-gray-600 hover:text-blue-400 transition-colors">
+          <span className="text-lg">📂</span>
+          <span className="text-[9px] mt-0.5">Folder</span>
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            multiple
+            className="hidden"
+            // @ts-expect-error webkitdirectory is non-standard
+            webkitdirectory=""
             onChange={(e) => {
               if (e.target.files && e.target.files.length > 0) {
                 onAdd(e.target.files);

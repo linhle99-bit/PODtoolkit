@@ -1,20 +1,79 @@
+import { useState } from 'react';
 import type { BundleConfig } from '../utils/canvas-renderer';
 
 interface Props {
   config: BundleConfig;
   onChange: (patch: Partial<BundleConfig>) => void;
   imageCount: number;
+  onAiAnalyze?: (apiKey: string) => void;
+  aiLoading?: boolean;
+  aiResult?: { theme: string; bundle_name: string } | null;
 }
 
 const SIZE_PRESETS = [
   { label: '4200×4200', w: 4200, h: 4200 },
   { label: '3000×3000', w: 3000, h: 3000 },
   { label: '2000×2000', w: 2000, h: 2000 },
+  { label: '4200×2800', w: 4200, h: 2800 },
+  { label: '3600×2400', w: 3600, h: 2400 },
 ];
 
-export default function SettingsPanel({ config, onChange, imageCount }: Props) {
+export default function SettingsPanel({ config, onChange, imageCount, onAiAnalyze, aiLoading, aiResult }: Props) {
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem('anthropic_api_key') || '');
+  const [showApiKey, setShowApiKey] = useState(false);
+
+  const handleAiAnalyze = () => {
+    if (!apiKey.trim()) return;
+    localStorage.setItem('anthropic_api_key', apiKey);
+    onAiAnalyze?.(apiKey);
+  };
+
   return (
     <div className="space-y-5">
+      {/* AI Analysis */}
+      <div>
+        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+          AI Auto-Style (Claude)
+        </label>
+        <div className="space-y-2">
+          <div className="relative">
+            <input
+              type={showApiKey ? 'text' : 'password'}
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              placeholder="sk-ant-api03-..."
+              className="w-full px-3.5 py-2.5 pr-16 bg-gray-800/60 border border-gray-700/50 rounded-xl text-white text-xs font-mono focus:outline-none focus:border-purple-500/50 transition"
+            />
+            <button
+              onClick={() => setShowApiKey(!showApiKey)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-500 hover:text-gray-300 px-1.5 py-0.5"
+            >
+              {showApiKey ? 'Hide' : 'Show'}
+            </button>
+          </div>
+          <button
+            onClick={handleAiAnalyze}
+            disabled={!apiKey.trim() || imageCount < 2 || aiLoading}
+            className="w-full px-4 py-2.5 bg-gradient-to-r from-orange-500/20 to-pink-500/20 border border-orange-500/30 text-orange-300 rounded-xl text-sm font-medium hover:from-orange-500/30 hover:to-pink-500/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+          >
+            {aiLoading ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-3 h-3 border-2 border-orange-300/30 border-t-orange-300 rounded-full animate-spin" />
+                Analyzing...
+              </span>
+            ) : (
+              '🧠 Analyze & Auto-Style'
+            )}
+          </button>
+          {aiResult && (
+            <div className="px-3 py-2 bg-green-500/10 border border-green-500/20 rounded-lg">
+              <p className="text-[11px] text-green-400 font-medium">Theme: {aiResult.theme}</p>
+              <p className="text-[10px] text-green-500/70 mt-0.5">Colors & title auto-applied</p>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Title */}
       <div>
         <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
@@ -102,7 +161,7 @@ export default function SettingsPanel({ config, onChange, imageCount }: Props) {
         <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
           Output Size
         </label>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {SIZE_PRESETS.map((p) => (
             <button
               key={p.label}

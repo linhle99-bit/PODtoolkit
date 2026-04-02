@@ -3,10 +3,13 @@ import UploadDesigns from './components/UploadDesigns';
 import SettingsPanel from './components/SettingsPanel';
 import PreviewExport from './components/PreviewExport';
 import { DEFAULT_CONFIG, type BundleConfig } from './utils/canvas-renderer';
+import { analyzeDesigns, type AiAnalysisResult } from './utils/ai-analyzer';
 
 export default function BundleGenerator() {
   const [imageSrcs, setImageSrcs] = useState<string[]>([]);
   const [config, setConfig] = useState<BundleConfig>({ ...DEFAULT_CONFIG });
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiResult, setAiResult] = useState<AiAnalysisResult | null>(null);
 
   const handleAddFiles = useCallback((files: FileList) => {
     const newSrcs: string[] = [];
@@ -28,11 +31,33 @@ export default function BundleGenerator() {
   const handleClear = useCallback(() => {
     imageSrcs.forEach((src) => URL.revokeObjectURL(src));
     setImageSrcs([]);
+    setAiResult(null);
   }, [imageSrcs]);
 
   const handleConfigChange = useCallback((patch: Partial<BundleConfig>) => {
     setConfig((prev) => ({ ...prev, ...patch }));
   }, []);
+
+  const handleAiAnalyze = useCallback(async (apiKey: string) => {
+    if (imageSrcs.length < 2) return;
+    setAiLoading(true);
+    try {
+      const result = await analyzeDesigns(imageSrcs, apiKey);
+      setAiResult(result);
+      // Apply AI suggestions to config
+      setConfig((prev) => ({
+        ...prev,
+        title: result.bundle_name,
+        backgroundColor: result.background_color,
+        accentColor: result.accent_color,
+        titleColor: result.title_color,
+      }));
+    } catch (err) {
+      alert(`AI analysis failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setAiLoading(false);
+    }
+  }, [imageSrcs]);
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -65,6 +90,9 @@ export default function BundleGenerator() {
                 config={config}
                 onChange={handleConfigChange}
                 imageCount={imageSrcs.length}
+                onAiAnalyze={handleAiAnalyze}
+                aiLoading={aiLoading}
+                aiResult={aiResult}
               />
             </div>
           </div>
